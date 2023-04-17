@@ -5,7 +5,8 @@
   gather_facts: false 
   tasks:
     - name: install the packages using python2
-      ansible_python_interpreter: /usr/bin/python
+      vars:
+        ansible_python_interpreter: /usr/bin/python
       ansible.builtin.yum:
         name:
           - python3
@@ -41,22 +42,25 @@
 - name: start docker containers on the server via docker-compose file
   hosts: remote_instance 
   become: true
-  become_user: "{{user_name}}"  
-  vars_prompt: docker-repo-password
+  become_user: "{{user_name}}"
+  vars_prompt:
+    - name: docker_repo_password
+      prompt: "Enter password for the docker repository login: "
+      private: true
   vars_files:
     - vars
   tasks:
     - name: copy the docker-compose file to the remote server
       ansible.builtin.copy:
-        src: "{{docker-compose-location}}"
-        dest: /home/{{user_name}}/{{docker-compose-name}}
+        src: "{{docker''_''compose''_''location}}"
+        dest: /home/{{user_name}}/{{docker''_''compose''_''name}}
     - name: login to the docker repository 
       community.docker.docker_login: 
-        registry_url: "{{docker-repo-url}}"
-        username: "{{docker-repo-username}}"
-        password: "{{docker-repo-password}}"
+        registry_url: "{{docker_repo_url}}"
+        username: "{{docker_repo_username}}"
+        password: "{{docker_repo_password}}"
     - name: start the containers using docker-compose up
       community.docker.docker_compose:
-        project_src: /home/{{user_name}}/{{docker-compose-name}}
+        project_src: /home/{{user_name}}/{{docker_compose_name}}
 
 

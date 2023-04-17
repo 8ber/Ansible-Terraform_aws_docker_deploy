@@ -1,5 +1,5 @@
 output "server-ip" {
-    value = aws_instance.myapp-server.public_ip
+    value = aws_instance.app-server.public_ip
 }
 
 output "ami_id" {

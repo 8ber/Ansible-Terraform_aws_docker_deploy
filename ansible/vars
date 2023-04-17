@@ -1,14 +1,14 @@
 ## defines the user name that is created to run the tasks
-user_name: ****
+user_name: your-username-here
 
 ## the newly created user assinged groups, defaults to support aws ec2-instance
 ## note: running docker commands without sudo is NOT supported, without adding to the docker group.
 user_groups: adm,docker 
 
 ## docker-compose file name and location
-docker-compose-name: ****.yaml
-docker-compose-location: ****.yaml
+docker_compose_name: docker-compose.yaml
+docker_compose_location: /home/your-username-here/docker-compose.yaml
 
-## set docker repository to login and pull 
-docker-repo-url: https//addres/
-docker-repo-username: ****
+## set docker repository info
+docker_repo_url: docker.repo.url 
+docker_repo_username: your-username-here
