@@ -1,0 +1,62 @@
+---
+- name: Install python3, docker, docker-compose
+  hosts: remote_instance
+  become: true
+  gather_facts: false 
+  tasks:
+    - name: install the packages using python2
+      ansible_python_interpreter: /usr/bin/python
+      ansible.builtin.yum:
+        name:
+          - python3
+          - docker
+        state: present 
+        update_cache: true
+    - name: install docker-compose
+      ansible.builtin.get_url: 
+        url: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-{{lookup('pipe', 'uname -m')}}
+        dest: /usr/local/bin/docker-compose
+        mode: +x
+    - name: start docker daemon
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+    - name: install python interpreter modules dependencys
+      ansible.builtin.pip:
+        name: 
+          - docker
+          - docker-compose
+
+- name: create docker linux user on the server
+  hosts: remote_instance
+  become: true
+  vars_files:
+    - vars
+  tasks:
+    - name: create the user
+      ansible.builtin.user: 
+        name: "{{user_name}}"
+        groups: "{{user_groups}}"
+
+- name: start docker containers on the server via docker-compose file
+  hosts: remote_instance 
+  become: true
+  become_user: "{{user_name}}"  
+  vars_prompt: docker-repo-password
+  vars_files:
+    - vars
+  tasks:
+    - name: copy the docker-compose file to the remote server
+      ansible.builtin.copy:
+        src: "{{docker-compose-location}}"
+        dest: /home/{{user_name}}/{{docker-compose-name}}
+    - name: login to the docker repository 
+      community.docker.docker_login: 
+        registry_url: "{{docker-repo-url}}"
+        username: "{{docker-repo-username}}"
+        password: "{{docker-repo-password}}"
+    - name: start the containers using docker-compose up
+      community.docker.docker_compose:
+        project_src: /home/{{user_name}}/{{docker-compose-name}}
+
+
